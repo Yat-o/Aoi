@@ -60,7 +60,7 @@ class NSFW(commands.Cog):
             return await ctx.send_info(f"```{endpoint_list}```")
 
         if tag is None:
-            tag = choice(*endpoints.values())
+            tag = choice(list(endpoints.values()))
 
             async with aiohttp.ClientSession() as session:
                 async with session.get(f"https://nekos.life/api/v2/img/{tag}") as resp:
