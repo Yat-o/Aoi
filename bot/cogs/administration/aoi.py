@@ -156,7 +156,7 @@ class Bot(commands.Cog):
                 ret = await func()
         except:
             value = stdout.getvalue()
-            await ctx.send(f"```py\n{value}{traceback.format_exc()}\n```")
+            await ctx.send_error(f"```py\n{value}{traceback.format_exc()}\n```")
         else:
             value = stdout.getvalue()
             try:
