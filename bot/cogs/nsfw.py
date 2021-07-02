@@ -50,7 +50,7 @@ class NSFW(commands.Cog):
         }
 
         if tag and tag is not None:
-            tag = endpoingits.get(tag.lower())
+            return tag == endpoints.get(tag.lower())
 
         if tag.lower() == "list":
             endpoint_list = "\n".join(endpoints.keys())
