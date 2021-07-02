@@ -18,4 +18,3 @@ complexity~=0.9.1
 dpy-button-utils==1.1.0
 Flask~=2.0.1
 sqlalchemy~=1.4.9
-jishaku==2.0.0
