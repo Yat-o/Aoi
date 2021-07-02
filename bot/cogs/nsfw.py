@@ -55,7 +55,7 @@ class NSFW(commands.Cog):
             tag = choice(endpoints)
 
         if tag in endpoints:
-            async with aiohttp.ClientSession as session:
+            async with aiohttp.ClientSession() as session:
                 async with session.get(f"https://nekos.life/api/v2/img/{tag}") as resp:
                     await ctx.embed(image=(await resp.json())["url"])
         else:
