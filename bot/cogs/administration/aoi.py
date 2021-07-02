@@ -39,6 +39,7 @@ class Bot(commands.Cog):
         self.shard_statuses: Dict[int, bool] = {}
         self.shard_server_counts: Dict[int, int] = {}
         self.redis = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
+        self._last_result = None
 
     @property
     def _config(self):
