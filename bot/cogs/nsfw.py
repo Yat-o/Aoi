@@ -11,7 +11,7 @@ class NSFW(commands.Cog):
     def __init__(self, bot: aoi.AoiBot):
         self.bot = bot
 
-    @commands.command(brief="Obligatory Hentai Command. Run [p]hentai list for available tags")
+    @commands.command(brief="Obligatory Hentai Command. Run `[p]hentai list` for available tags")
     async def hentai(self, ctx: aoi.AoiContext, tag: str = None):
         endpoints = [
             "Random_hentai_gif",
@@ -49,7 +49,8 @@ class NSFW(commands.Cog):
             "gasm",
         ]
         if tag.lower() == "list":
-            await ctx.embed(description=",".join(endpoints))
+            endpoint_list = "\n".join(endpoints)
+            return await ctx.embed(description=f"```{endpoint_list}```")
 
         if tag is None:
             tag = choice(endpoints)
