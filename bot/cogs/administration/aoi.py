@@ -2,16 +2,23 @@ import os
 import subprocess
 from datetime import datetime
 from typing import List, Dict
+import re
+import io
+import traceback
+import textwrap
 
 import aiohttp
 import aiosqlite
 import psutil
 import redis
 
+from contextlib import redirect_stdout
 from bot import aoi
 import discord
 from discord.ext import commands, tasks
 from libs.conversions import dhm_notation, hms_notation, maybe_pluralize, sql_trim
+
+START_CODE_BLOCK_RE = re.compile(r"^((```py(thon)?)(?=\s)|(```))")
 
 
 # TODO help refactor
@@ -83,6 +90,101 @@ class Bot(commands.Cog):
         for guild in self.bot.guilds:
             shard_id = (guild.id >> 22) % self.bot.shard_count
             self.shard_server_counts[shard_id] = self.shard_server_counts.get(shard_id, 0) + 1
+
+    @staticmethod
+    def cleanup_code(content):
+        """Automatically removes code blocks from the code."""
+        # remove ```py\n```
+        if content.startswith("```") and content.endswith("```"):
+            return START_CODE_BLOCK_RE.sub("", content)[:-3]
+
+        # remove `foo`
+        return content.strip("` \n")
+
+    # noinspection PyMethodMayBeStatic
+    def get_syntax_error(self, e):
+        if e.text is None:
+            return f"```py\n{e.__class__.__name__}: {e}\n```"
+        return f'```py\n{e.text}{"^":>{e.offset}}\n{e.__class__.__name__}: {e}```'
+
+    # noinspection PyMethodMayBeStatic
+    def paginate(self, text: str):
+        """Fix the limit since tyler gay."""
+        last = 0
+        pages = []
+        for curr in range(0, len(text)):
+            if curr % 1980 == 0:
+                pages.append(text[last:curr])
+                last = curr
+                appd_index = curr
+        if appd_index != len(text) - 1:
+            pages.append(text[last:curr])
+        return list(filter(lambda a: a != "", pages))
+
+
+    @commands.command(name="eval", brief="Personal eval command")
+    @commands.is_owner()
+    async def _eval(self, ctx: aoi.AoiContext, *, body: str):
+        """Evaluates python code"""
+
+        env = {
+            "bot": self.bot,
+            "ctx": ctx,
+            "channel": ctx.channel,
+            "author": ctx.author,
+            "guild": ctx.guild,
+            "message": ctx.message,
+            "_": self._last_result,
+        }
+
+        env.update(globals())
+
+        body = self.cleanup_code(body)
+        stdout = io.StringIO()
+
+        to_compile = f'async def func():\n{textwrap.indent(body, "  ")}'
+
+        try:
+            exec(to_compile, env)
+        except Exception as e:
+            return await ctx.send_error(f"```py\n{e.__class__.__name__}: {e}\n```")
+
+        func = env["func"]
+        try:
+            with redirect_stdout(stdout):
+                ret = await func()
+        except:
+            value = stdout.getvalue()
+            await ctx.send(f"```py\n{value}{traceback.format_exc()}\n```")
+        else:
+            value = stdout.getvalue()
+            try:
+                await ctx.message.add_reaction("\u2705")
+            except:
+                pass
+
+            if ret is None:
+                try:
+                    return
+                except:
+                    paginated_text = self.paginate(value)
+                    for page in paginated_text:
+                        if page == paginated_text[-1]:
+                            await ctx.send_ok(f"```py\n{page}\n```")
+                            break
+                        await ctx.send_ok(f"```py\n{page}\n```")
+            else:
+                self._last_result = ret
+                try:
+                    await ctx.send_ok(f"```py\n{value}{ret}\n```")
+                except:
+                    paginated_text = self.paginate(f"{value}{ret}")
+                    for page in paginated_text:
+                        if page == paginated_text[-1]:
+                            await ctx.send_ok(f"```py\n{page}\n```")
+                            break
+                        await ctx.send_ok(f"```py\n{page}\n```")
+
 
     @commands.command(
         brief="Shows bot stats"
