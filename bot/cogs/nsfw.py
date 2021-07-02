@@ -48,6 +48,10 @@ class NSFW(commands.Cog):
             "cum_jpg": "cum_jpg",
             "gasm": "gasm",
         }
+
+        if tag and tag is not None :
+            tag = endpoints[tag.lower()][0]
+
         if tag.lower() == "list":
             endpoint_list = "\n".join(endpoints.keys())
             return await ctx.send_info(f"```{endpoint_list}```")
@@ -56,7 +60,7 @@ class NSFW(commands.Cog):
             tag = choice(*endpoints.values())
 
             async with aiohttp.ClientSession() as session:
-                async with session.get(f"https://nekos.life/api/v2/img/{endpoints[tag.lower()][0]}") as resp:
+                async with session.get(f"https://nekos.life/api/v2/img/{tag}") as resp:
                     await ctx.embed(image=(await resp.json())["url"])
         else:
             await ctx.send_error(f"Tag not found in available tags. Run `{ctx.clean_prefix}hentai list` to see all tags")
