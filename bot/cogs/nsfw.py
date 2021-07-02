@@ -49,11 +49,8 @@ class NSFW(commands.Cog):
             "gasm": "gasm",
         }
 
-        if tag and tag is not None :
-            tag = endpoints[tag.lower()][0]
-
-        if tag is None:
-            tag = choice(*endpoints.values())
+        if tag and tag is not None:
+            tag = endpoingits.get(tag.lower())
 
         if tag.lower() == "list":
             endpoint_list = "\n".join(endpoints.keys())
