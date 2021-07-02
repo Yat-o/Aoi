@@ -12,52 +12,51 @@ class NSFW(commands.Cog):
         self.bot = bot
 
     @commands.command(brief="Obligatory Hentai Command. Run `[p]hentai list` for available tags")
-    async def hentai(self, ctx: aoi.AoiContext, tag: str = None):
-        endpoints = [
-            "Random_hentai_gif",
-            "pussy",
-            "nsfw_neko_gif",
-            "lewd",
-            "les",
-            "kuni",
-            "cum",
-            "classic",
-            "boobs",
-            "bj",
-            "anal",
-            "yuri",
-            "trap",
-            "tits",
-            "solog",
-            "solo",
-            "pwankg",
-            "pussy_jpg",
-            "lewdkemo",
-            "lewdk",
-            "keta",
-            "hololewd",
-            "holoero",
-            "hentai",
-            "femdom",
-            "feetg",
-            "erofeet",
-            "feet",
-            "ero",
-            "erok",
-            "erokemo",
-            "cum_jpg",
-            "gasm",
-        ]
+    async def hentai(self, ctx: aoi.AoiContext, *, tag: str = None):
+        endpoints = {
+            "random hentai gif": "Random_hentai_gif",
+            "pussy": "pussy",
+            "nsfw neko gif": "nsfw_neko_gif",
+            "lewd": "lewd",
+            "les": "les",
+            "kuni": "kuni",
+            "cum": "cum",
+            "classic": "classic",
+            "boobs": "boobs",
+            "bj": "bj",
+            "anal": "anal",
+            "yuri": "yuri",
+            "trap": "trap",
+            "tits": "tits",
+            "solog": "solog",
+            "solo": "solo",
+            "pwankg": "pwankg",
+            "pussy_jpg": "pussy_jpg",
+            "lewdkemo": "lewdkemo",
+            "lewdk": "lewdk",
+            "keta": "keta",
+            "hololewd": "hololewd",
+            "holoero": "holoero",
+            "hentai": "hentai",
+            "femdom": "femdom",
+            "feetg": "feetg",
+            "erofeet": "erofeet",
+            "feet": "feet",
+            "ero": "ero",
+            "erok": "erok",
+            "erokemo": "erokemo",
+            "cum_jpg": "cum_jpg",
+            "gasm": "gasm",
+        }
         if tag.lower() == "list":
-            endpoint_list = "\n".join(endpoints)
-            return await ctx.embed(description=f"```{endpoint_list}```")
+            endpoint_list = "\n".join(endpoints.keys())
+            return await ctx.send_info(f"```{endpoint_list}```")
 
         if tag is None:
-            tag = choice(endpoints)
+            tag = choice(*endpoints.values())
 
-        if tag in endpoints:
             async with aiohttp.ClientSession() as session:
-                async with session.get(f"https://nekos.life/api/v2/img/{tag}") as resp:
+                async with session.get(f"https://nekos.life/api/v2/img/{endpoints[tag.lower()][0]}") as resp:
                     await ctx.embed(image=(await resp.json())["url"])
         else:
             await ctx.send_error(f"Tag not found in available tags. Run `{ctx.clean_prefix}hentai list` to see all tags")
