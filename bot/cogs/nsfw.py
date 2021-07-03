@@ -12,6 +12,7 @@ class NSFW(commands.Cog):
         self.bot = bot
 
     @commands.command(brief="Obligatory Hentai Command. Run `[p]hentai list` for available tags")
+    @commands.is_nsfw()
     async def hentai(self, ctx: aoi.AoiContext, *, tag: str = None):
         endpoints = {
             "random hentai gif": "Random_hentai_gif",
@@ -53,8 +54,8 @@ class NSFW(commands.Cog):
             tag = choice(list(endpoints.values()))
 
         if tag is not None and tag.lower() == "list":
-            available_tags = "\n".join(list(endpoints.keys()))
-            return await ctx.send_info(f"Available Tags:\n{available_tags}")
+            available_tags = "\n".join(endpoints.keys())
+            return await ctx.send_info(f"\n**__Available Tags:__**:\n{available_tags}")
 
         if tag is not None and tag in endpoints.keys():
             tag = endpoints.get(tag)
