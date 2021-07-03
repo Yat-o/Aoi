@@ -53,7 +53,7 @@ class NSFW(commands.Cog):
             tag = choice(list(endpoints.values()))
 
         if tag is not None and tag.lower() == "list":
-            available_tags = "\n".join(list(endpoints.values()))
+            available_tags = "\n".join(list(endpoints.keys()))
             return await ctx.send_info(f"Available Tags:\n{available_tags}")
 
         if tag is not None and tag in endpoints.keys():
