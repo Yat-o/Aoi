@@ -31,7 +31,7 @@ class NSFW(commands.Cog):
             "solog": "solog",
             "solo": "solo",
             "pwankg": "pwankg",
-            "pussy_jpg": "pussy_jpg",
+            "pussy jpg": "pussy_jpg",
             "lewdkemo": "lewdkemo",
             "lewdk": "lewdk",
             "keta": "keta",
@@ -49,16 +49,15 @@ class NSFW(commands.Cog):
             "gasm": "gasm",
         }
 
-        if tag and tag is not None:
-            return tag == endpoints.get(tag.lower())
-
-        if tag.lower() == "list":
-            endpoint_list = "\n".join(endpoints.keys())
-            return await ctx.send_info(f"```{endpoint_list}```")
-
         if tag is None:
             tag = choice(list(endpoints.values()))
 
+        if tag is not None and tag.lower() == "list":
+            available_tags = "\n".join(list(endpoints.values()))
+            return await ctx.send_info(f"Available Tags:\n{available_tags}")
+
+        if tag is not None and tag in endpoints.keys():
+            tag = endpoints.get(tag)
             async with aiohttp.ClientSession() as session:
                 async with session.get(f"https://nekos.life/api/v2/img/{tag}") as resp:
                     await ctx.embed(image=(await resp.json())["url"])
